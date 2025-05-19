@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -49,8 +51,10 @@ public class Test {
 	/**
 	 * Finds top-performing students based on the specified criteria.
 	 * 
-	 * @param completions List of course completions for all students
-	 * @param currentDate The current date for recency calculations
+	 * @param completions
+	 *            List of course completions for all students
+	 * @param currentDate
+	 *            The current date for recency calculations
 	 * @return Map of student IDs to their average grades, sorted by grade
 	 *         (descending)
 	 */
@@ -113,7 +117,13 @@ public class Test {
 
 		Map<Integer, Double> finalvaluesWithGrades = new HashMap<Integer, Double>();
 		finalVal.forEach(a -> finalvaluesWithGrades.put(a.getStudentId(), avgGrades.get(a.getStudentId())));
-		return finalvaluesWithGrades; // Placeholder return value
+
+		Map<Integer, Double> finalvaluesWithGradesSortedByGrade = finalvaluesWithGrades.entrySet().stream()
+				.sorted((a, b) -> {
+					return a.getValue() > b.getValue() ? -1 : a.getValue() < b.getValue() ? 1 : 0;
+				}).collect(Collectors.toMap(a -> a.getKey(), a -> a.getValue(), (a, b) -> a, LinkedHashMap::new));
+
+		return finalvaluesWithGradesSortedByGrade; // Placeholder return value
 	}
 
 	/**
@@ -126,7 +136,8 @@ public class Test {
 
 		List<CourseCompletion> completions = new ArrayList<>();
 
-		// Student 101 - Should be included (avg: 88.75%, 4 subjects, no fails, recent
+		// Student 101 - Should be included (avg: 88.75%, 4 subjects, no fails,
+		// recent
 		// completion)
 		completions.add(new CourseCompletion(101, "MATH101", "Mathematics", 92, today.minusDays(10)));
 		completions.add(new CourseCompletion(101, "ENG203", "English", 85, today.minusDays(45)));
@@ -136,10 +147,12 @@ public class Test {
 		// Student 102 - Should NOT be included (has a failing grade)
 		completions.add(new CourseCompletion(102, "MATH101", "Mathematics", 91, today.minusDays(15)));
 		completions.add(new CourseCompletion(102, "ENG203", "English", 88, today.minusDays(20)));
-		completions.add(new CourseCompletion(102, "PHYS101", "Physics", 55, today.minusDays(25))); // failing grade
+		completions.add(new CourseCompletion(102, "PHYS101", "Physics", 55, today.minusDays(25))); // failing
+																									// grade
 		completions.add(new CourseCompletion(102, "CHEM101", "Chemistry", 92, today.minusDays(5)));
 
-		// Student 103 - Should be included (avg: 92.6%, 5 subjects, no fails, recent
+		// Student 103 - Should be included (avg: 92.6%, 5 subjects, no fails,
+		// recent
 		// completion)
 		completions.add(new CourseCompletion(103, "MATH101", "Mathematics", 95, today.minusDays(20)));
 		completions.add(new CourseCompletion(103, "ENG203", "English", 87, today.minusDays(15)));
